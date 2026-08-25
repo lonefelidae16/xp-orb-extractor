@@ -5,7 +5,7 @@ plugins {
 
 def javaVersion = Integer.parseInt(project.java_lang_version)
 
-version = project.mod_version
+version = "${project.mod_version}+${project.minecraft_version}"
 group = project.maven_group
 
 base {
