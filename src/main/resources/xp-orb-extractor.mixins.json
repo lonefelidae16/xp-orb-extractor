@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "me.lonefelidae16.xpOrbExtractor.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ExtendBlockBehaviourMixin",
+		"SculkCatalystBlockMixin",
+		"ThrowableItemProjectileAccessor",
+		"ThrownExperienceBottleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

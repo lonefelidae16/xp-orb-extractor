@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "xp-orb-extractor:item/experience_bottle",
+    "layer1": "xp-orb-extractor:item/particle/golden"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "xp_drain_fail": {
+    "sounds": [
+      {
+        "name": "block.sculk_catalyst.place",
+        "volume": 0.9,
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.xporbextractor.xp_drain_fail"
+  }
+}
