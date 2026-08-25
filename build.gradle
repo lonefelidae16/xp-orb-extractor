@@ -57,6 +57,7 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
+	exclude("**/*.xcf", "assets/orig/**")
 }
 
 // configure the maven publication

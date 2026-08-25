@@ -11,6 +11,7 @@
 	},
 	"license": "MIT",
 	"environment": "*",
+	"icon": "assets/xp-orb-extractor/icon.png",
 	"entrypoints": {
 		"main": [
 			"me.lonefelidae16.xpOrbExtractor.XpOrbExtractor"
