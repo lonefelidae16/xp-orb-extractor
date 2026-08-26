@@ -34,9 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -102,7 +100,8 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
             }
         }
 
-        ExperienceOrb.award(serverLevel, Vec3.upFromBottomCenterOf(pos, 1.5f), drainResult.amount);
+        final BlockPos airBlockOrOrigin = xporbextractor$searchAirBlock(serverLevel, pos).orElse(pos);
+        ExperienceOrb.award(serverLevel, Vec3.atCenterOf(airBlockOrOrigin), drainResult.amount);
         return false;
     }
 
@@ -118,5 +117,11 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
     private static void xporbextractor$onFailureFeedback(ServerLevel level, BlockPos pos) {
         level.sendParticles(DustColorTransitionOptions.SCULK_TO_REDSTONE, pos.getX() + 0.5f, pos.getY() + 1.1f, pos.getZ() + 0.5f, 8, 0.2f, 0f, 0.2f, 0.1f);
         level.playSound(null, pos, XpOrbExtractor.SoundEvents.XP_DRAIN_FAIL, SoundSource.BLOCKS);
+    }
+
+    @Unique
+    private static Optional<BlockPos> xporbextractor$searchAirBlock(ServerLevel serverLevel, BlockPos origin) {
+        final BlockPos[] searcher = new BlockPos[]{origin.above(), origin.north(), origin.west(), origin.south(), origin.east(), origin.below()};
+        return Arrays.stream(searcher).filter(pos -> serverLevel.getBlockState(pos).isAir()).findFirst();
     }
 }
