@@ -21,14 +21,17 @@ public abstract class ThrownExperienceBottleMixin extends ThrowableItemProjectil
 
     @ModifyVariable(method = "onHit", at = @At("STORE"), name = "xpCount")
     private int xporbextractor$modifyXpCount(int original) {
-        try {
-            if (this.level() instanceof ServerLevel) {
-                ItemStack stack = this.getEntityData().get(ThrowableItemProjectileAccessor.xporbextractor$accessDataItemStack());
+        if (this.level() instanceof ServerLevel) {
+            try {
+                final ItemStack stack = this.getEntityData().get(ThrowableItemProjectileAccessor.xporbextractor$accessDataItemStack());
                 if (stack.is(Items.EXPERIENCE_BOTTLE) && stack.has(DataComponents.CUSTOM_DATA)) {
-                    return stack.get(DataComponents.CUSTOM_DATA).copyTag().get(XpOrbExtractor.TAG_XP_AMOUNT).asInt().orElseThrow();
+                    final int count = stack.get(DataComponents.CUSTOM_DATA).copyTag().get(XpOrbExtractor.TAG_XP_AMOUNT).asInt().orElseThrow();
+                    if (count > 0) {
+                        return count;
+                    }
                 }
+            } catch (Exception ignore) {
             }
-        } catch (Exception ignore) {
         }
 
         return original;

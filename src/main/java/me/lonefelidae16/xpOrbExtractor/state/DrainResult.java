@@ -7,7 +7,7 @@ public class DrainResult {
     public final boolean bDepleted;
 
     public DrainResult(int amount, boolean bDepleted) {
-        this.amount = amount;
+        this.amount = Math.max(amount, 0);
         this.bDepleted = bDepleted;
     }
 }
