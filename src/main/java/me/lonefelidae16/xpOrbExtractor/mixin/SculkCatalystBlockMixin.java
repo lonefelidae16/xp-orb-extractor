@@ -8,6 +8,7 @@ import me.lonefelidae16.xpOrbExtractor.util.PlayerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustColorTransitionOptions;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
@@ -91,6 +92,7 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
             final CompoundTag tag = new CompoundTag();
             final ItemLore lore = new ItemLore(List.of(Component.translatable("item.xporbextractor.xp_amount_text", drainResult.amount)));
             tag.put(XpOrbExtractor.TAG_XP_AMOUNT, IntTag.valueOf(drainResult.amount));
+            tag.put(XpOrbExtractor.TAG_HAS_XP_AMOUNT, ByteTag.valueOf(true));
             toExtract.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
             toExtract.set(DataComponents.LORE, lore);
 

@@ -1,8 +1,11 @@
 {
   "model": {
     "type": "minecraft:condition",
-    "property": "has_component",
-    "component": "minecraft:custom_data",
+    "property": "component",
+    "predicate": "minecraft:custom_data",
+    "value": {
+      "has_xp_amount": true
+    },
     "on_true": {
       "type": "model",
       "model": "xp-orb-extractor:item/experience_bottle"

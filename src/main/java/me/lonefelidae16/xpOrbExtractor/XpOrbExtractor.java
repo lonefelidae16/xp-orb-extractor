@@ -13,6 +13,7 @@ public final class XpOrbExtractor implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger(XpOrbExtractor.class, new PrefixableMessageFactory(XpOrbExtractor.class.getSimpleName()));
     public static final String MOD_ID = "xp-orb-extractor";
     public static final String TAG_XP_AMOUNT = "xp_amount";
+    public static final String TAG_HAS_XP_AMOUNT = "has_xp_amount";
 
     private static final XpOrbExtractorConfig CONFIG = XpOrbExtractorConfig.load();
 
