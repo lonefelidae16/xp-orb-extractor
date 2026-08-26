@@ -1,0 +1,23 @@
+#!/bin/sh
+
+CWD="$(pwd)"
+TARGET_FILE="${CWD}/resourcepack/xp-orb-extractor-server-pack.zip"
+TARGET_SHA1_FILE="${TARGET_FILE}.sha1sum"
+
+rm "$TARGET_FILE"
+
+cd src/main/resources/assets/
+7z a -tzip -r "$TARGET_FILE" minecraft/ xp-orb-extractor/ -x!icon.png
+
+cd xp-orb-extractor/
+7z a -tzip "$TARGET_FILE" icon.png
+
+cd ../orig/
+7z a -tzip "$TARGET_FILE" pack.mcmeta
+
+git add "$TARGET_FILE"
+
+HASH=$(sha1sum "$TARGET_FILE" | awk '{print $1}')
+echo $HASH > "$TARGET_SHA1_FILE"
+echo "sha1sum returns '$HASH'"
+git add "$TARGET_SHA1_FILE"
