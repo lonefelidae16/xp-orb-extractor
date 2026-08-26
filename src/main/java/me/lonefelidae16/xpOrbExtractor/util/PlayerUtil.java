@@ -37,14 +37,14 @@ public class PlayerUtil {
                     ++drainedLevel;
                 }
 
-                final boolean bDepleted = drainedLevel < maxAmount && xp < Integer.MAX_VALUE;
-                if (bDepleted) {
-                    while (canExtractXpAsOneOrb(player)) {
+                final boolean bLevelReached = drainedLevel == maxAmount;
+                if (!bLevelReached && xp < Integer.MAX_VALUE) {
+                    while (canExtractXpAsOneOrb(player) && xp < Integer.MAX_VALUE) {
                         player.giveExperiencePoints(-1);
                         ++xp;
                     }
                 }
-                return new DrainResult(xp, bDepleted);
+                return new DrainResult(xp, !bLevelReached && xp < Integer.MAX_VALUE);
             }
             case XP -> {
                 int xp = 0;
