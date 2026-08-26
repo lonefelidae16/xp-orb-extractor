@@ -6,16 +6,20 @@
 
 [![Requires Fabric API]][Fabric API]
 
-[![Latest build on GitHub]](https://github.com/lonefelidae16/xp-orb-extractor/releases)
-
-**[Modrinth](https://modrinth.com/mod/xp-orb-extractor)**
-
 XP Orb Extractor lets you customize Bottles o’ Enchanting to release a precise amount of experience orbs upon use,
 instead of random drops.
 
 To easily gather your XP into bottles, interact with a Sculk Catalyst using an empty glass bottle.
 
+![Customized Bottle o’ Enchanting](./md-resource/images/customized-bottle-o-enchanting.png)
+
+![Sculk Catalyst Drops a Bottle](./md-resource/images/sculk-catalyst-blooms.gif)
+
+![Sculk Catalyst Drops Orbs](./md-resource/images/sculk-catalyst-rejects-player.gif)
+
 ## Compatibility & Installation
+
+Supports on [Fabric](https://fabricmc.net/use/) and requires [Fabric API][Fabric API].
 
 This mod operates on the server, but includes client-facing assets, such as translations and sprites.
 
