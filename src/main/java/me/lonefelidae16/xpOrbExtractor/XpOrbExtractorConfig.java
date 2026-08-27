@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.network.chat.Component;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,10 +85,13 @@ public class XpOrbExtractorConfig {
     public DrainDepletion depletion = DrainDepletion.DENY;
 
     public static XpOrbExtractorConfig load() {
-        try (FileReader reader = new FileReader(CONFIG_FILE.toFile())) {
-            return Objects.requireNonNull(CONVERTER.fromJson(reader, XpOrbExtractorConfig.class));
-        } catch (Exception ex) {
-            XpOrbExtractor.LOGGER.error("Failed to load config file, resetting.");
+        final File configFile = CONFIG_FILE.toFile();
+        if (configFile.exists()) {
+            try (FileReader reader = new FileReader(configFile)) {
+                return Objects.requireNonNull(CONVERTER.fromJson(reader, XpOrbExtractorConfig.class));
+            } catch (Exception ex) {
+                XpOrbExtractor.LOGGER.error("Failed to load config file, resetting.");
+            }
         }
         var instance = new XpOrbExtractorConfig();
         save(instance);
