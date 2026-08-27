@@ -12,12 +12,17 @@ import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,42 +42,43 @@ import org.spongepowered.asm.mixin.Unique;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Mixin(SculkCatalystBlock.class)
 public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin {
     @Unique
-    private static final Set<UUID> XPORBEX$PENDING_PLAYERS = ConcurrentHashMap.newKeySet();
+    private static final Set<BlockPos> XPORBEX$PENDING_POSITIONS = ConcurrentHashMap.newKeySet();
     @Unique
-    private static final float XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER = 0.25f;
+    private static final Vec3 XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER = new Vec3(0.25f, 0.25f, 0.25f);
 
     @Override
-    protected InteractionResult xporbextractor$wrapUseItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, @Nullable Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original) {
-        if (itemStack.is(Items.GLASS_BOTTLE) && XpOrbExtractor.config().bModEnabled && player != null) {
-            final UUID playerUUID = UUID.fromString(player.getUUID().toString());
-            final Vec3 blockToPlayerDir = player.position().subtract(Vec3.atBottomCenterOf(pos)).normalize();
-            if (level instanceof ServerLevel serverLevel && XPORBEX$PENDING_PLAYERS.add(playerUUID)) {
+    protected InteractionResult xporbextractor$wrapUseItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original) {
+        if (itemStack.is(Items.GLASS_BOTTLE) && XpOrbExtractor.config().bModEnabled) {
+            if (level instanceof ServerLevel serverLevel) {
+                final MinecraftServer server = serverLevel.getServer();
+                final UUID playerUUID = UUID.fromString(player.getUUID().toString());
+                final ResourceKey<Level> dimension = level.dimension();
+                if (!XPORBEX$PENDING_POSITIONS.add(pos)) {
+                    return InteractionResult.TRY_WITH_EMPTY_HAND;
+                }
+
+                itemStack.consume(1, player);
+                player.awardStat(Stats.ITEM_USED.get(Items.GLASS_BOTTLE));
+
                 CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return PlayerUtil.getAndDecreaseXp(player);
-                    } catch (Exception ex) {
-                        XpOrbExtractor.LOGGER.error("An error occurred getting xp count", ex);
-                    }
-                    return DrainResult.EMPTY;
+                    return PlayerUtil.getAndDecreaseXp(player);
                 }).thenAcceptAsync(result -> {
-                    serverLevel.getServer().execute(() -> {
-                        if (xporbextractor$trySpawnBottleEntity(serverLevel, pos, blockToPlayerDir, result)) {
-                            try {
-                                itemStack.consume(1, player);
-                                player.awardStat(Stats.ITEM_USED.get(Items.GLASS_BOTTLE));
-                            } catch (Exception ex) {
-                                XpOrbExtractor.LOGGER.error("An error occurred access to player", ex);
-                            }
-                            xporbextractor$onSucceedFeedback(serverLevel, pos);
+                    server.execute(() -> {
+                        Player targetPlayer = server.getPlayerList().getPlayer(playerUUID);
+                        ServerLevel targetLevel = Optional.ofNullable(server.getLevel(dimension)).orElse(server.overworld());
+                        if (xporbextractor$trySpawnExpBottleEntity(targetLevel, pos, targetPlayer, result)) {
+                            xporbextractor$onSucceedFeedback(targetLevel, pos);
                         } else {
-                            xporbextractor$onFailureFeedback(serverLevel, pos);
+                            xporbextractor$onFailureFeedback(targetLevel, pos);
                         }
                     });
-                    XPORBEX$PENDING_PLAYERS.remove(playerUUID);
+
+                    CompletableFuture.delayedExecutor(3, TimeUnit.SECONDS).execute(() -> XPORBEX$PENDING_POSITIONS.remove(pos));
                 });
                 return InteractionResult.SUCCESS_SERVER;
             }
@@ -83,16 +89,13 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
     }
 
     @Unique
-    private static boolean xporbextractor$trySpawnBottleEntity(ServerLevel serverLevel, BlockPos pos, Vec3 toPlayerDirection, DrainResult drainResult) {
-        if (drainResult.amount == 0) {
-            return false;
-        }
-
-        final Vec3 velocity = toPlayerDirection.multiply(XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER, XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER, XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER);
+    private static boolean xporbextractor$trySpawnExpBottleEntity(ServerLevel serverLevel, BlockPos pos, @Nullable Player player, DrainResult drainResult) {
+        final Optional<Vec3> playerPosition = Optional.ofNullable(player).map(Entity::position);
         final BlockPos spawnTarget;
         if (serverLevel.getBlockState(pos.above()).isAir()) {
             spawnTarget = pos.above();
         } else {
+            Vec3 toPlayerDirection = playerPosition.map(plPos -> plPos.subtract(Vec3.atBottomCenterOf(pos))).orElse(Vec3.Y_AXIS);
             BlockPos playerDirOffset = pos.offset((int) Math.round(toPlayerDirection.x), (int) Math.round(toPlayerDirection.y), (int) Math.round(toPlayerDirection.z));
             if (serverLevel.getBlockState(playerDirOffset).isAir()) {
                 spawnTarget = playerDirOffset;
@@ -100,23 +103,38 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
                 spawnTarget = xporbextractor$searchAirBlock(serverLevel, playerDirOffset).orElse(pos);
             }
         }
-        if (!drainResult.bDepleted || XpOrbExtractor.config().depletion == XpOrbExtractorConfig.DrainDepletion.ALLOW) {
-            final ItemStack toExtract = new ItemStack(Items.EXPERIENCE_BOTTLE);
+        final Vec3 spawnTargetCenter = Vec3.atCenterOf(spawnTarget);
+        final Vec3 spawnVelocity = playerPosition.map(plPos -> plPos.subtract(spawnTargetCenter)).orElse(Vec3.Y_AXIS).multiply(XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER);
+        if ((!drainResult.bDepleted && !drainResult.bFatal) || XpOrbExtractor.config().depletion == XpOrbExtractorConfig.DrainDepletion.ALLOW) {
+            final ItemStack targetItemStack = new ItemStack(Items.EXPERIENCE_BOTTLE);
             final CompoundTag tag = new CompoundTag();
             final ItemLore lore = new ItemLore(List.of(Component.translatable("item.xporbextractor.xp_amount_text", drainResult.amount)));
             tag.put(XpOrbExtractor.TAG_XP_AMOUNT, IntTag.valueOf(drainResult.amount));
             tag.put(XpOrbExtractor.TAG_HAS_XP_AMOUNT, ByteTag.valueOf(true));
-            toExtract.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-            toExtract.set(DataComponents.LORE, lore);
+            targetItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            targetItemStack.set(DataComponents.LORE, lore);
 
-            final ItemEntity entity = new ItemEntity(serverLevel, spawnTarget.getX() + 0.5f, spawnTarget.getY() + 0.5f, spawnTarget.getZ() + 0.5f, toExtract, velocity.x, velocity.y, velocity.z);
-            if (serverLevel.addFreshEntity(entity)) {
-                return true;
+            return xporbextractor$spawnItemEntity(serverLevel, targetItemStack, spawnTargetCenter, spawnVelocity);
+        } else {
+            final ItemStack targetItemStack = new ItemStack(Items.GLASS_BOTTLE);
+            if (player == null) {
+                serverLevel.getChunkSource().addTicket(new Ticket(TicketType.PLAYER_SIMULATION, 1), serverLevel.getChunk(pos).getPos());
+                xporbextractor$spawnItemEntity(serverLevel, targetItemStack, spawnTargetCenter, spawnVelocity);
+            } else if (!player.getAbilities().instabuild) {
+                player.getInventory().add(targetItemStack);
             }
-        }
 
-        ExperienceOrb.award(serverLevel, Vec3.atCenterOf(spawnTarget), drainResult.amount);
-        return false;
+            if (drainResult.amount > 0) {
+                ExperienceOrb.award(serverLevel, spawnTargetCenter, drainResult.amount);
+            }
+            return false;
+        }
+    }
+
+    @Unique
+    private static boolean xporbextractor$spawnItemEntity(ServerLevel serverLevel, ItemStack toSpawn, Vec3 target, Vec3 velocity) {
+        final ItemEntity entity = new ItemEntity(serverLevel, target.x, target.y, target.z, toSpawn, velocity.x, velocity.y, velocity.z);
+        return serverLevel.addFreshEntity(entity);
     }
 
     @Unique

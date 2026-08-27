@@ -5,6 +5,7 @@ public class DrainResult {
 
     public final int amount;
     public final boolean bDepleted;
+    public final boolean bFatal;
 
     /**
      * Shows the result of draining the Player's experience points.
@@ -13,7 +14,15 @@ public class DrainResult {
      * @param bDepleted If {@code true}, Player does not have required points.
      */
     public DrainResult(int amount, boolean bDepleted) {
+        this(amount, bDepleted, false);
+    }
+
+    /**
+     * @param bFatal If {@code true}, something went wrong draining xp.
+     */
+    public DrainResult(int amount, boolean bDepleted, boolean bFatal) {
         this.amount = Math.max(amount, 0);
         this.bDepleted = bDepleted;
+        this.bFatal = bFatal;
     }
 }

@@ -29,37 +29,48 @@ public class PlayerUtil {
             case LEVEL -> {
                 int xp = 0;
                 int drainedLevel = 0;
-                while (drainedLevel < maxAmount && xp < Integer.MAX_VALUE && player.experienceLevel > 0) {
-                    final int remaining = Integer.MAX_VALUE - xp;
-                    final int toDrain = Math.min(player.getXpNeededForNextLevel(), remaining);
-                    player.giveExperiencePoints(-toDrain);
-                    xp += toDrain;
-                    ++drainedLevel;
-                }
-
-                final boolean bLevelReached = drainedLevel == maxAmount;
-                if (!bLevelReached && xp < Integer.MAX_VALUE) {
-                    while (canExtractXpAsOneOrb(player) && xp < Integer.MAX_VALUE) {
-                        player.giveExperiencePoints(-1);
-                        ++xp;
+                boolean bLevelReached;
+                try {
+                    while (drainedLevel < maxAmount && xp < Integer.MAX_VALUE && player.experienceLevel > 0) {
+                        final int remaining = Integer.MAX_VALUE - xp;
+                        final int toDrain = Math.min(player.getXpNeededForNextLevel(), remaining);
+                        player.giveExperiencePoints(-toDrain);
+                        xp += toDrain;
+                        ++drainedLevel;
                     }
+
+                    bLevelReached = drainedLevel == maxAmount;
+                    if (!bLevelReached && xp < Integer.MAX_VALUE) {
+                        while (canExtractXpAsOneOrb(player) && xp < Integer.MAX_VALUE) {
+                            player.giveExperiencePoints(-1);
+                            ++xp;
+                        }
+                    }
+                } catch (Exception ex) {
+                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp", ex);
+                    return new DrainResult(xp, false, true);
                 }
                 return new DrainResult(xp, !bLevelReached && xp < Integer.MAX_VALUE);
             }
             case XP -> {
                 int xp = 0;
-                while (player.experienceLevel > 0 && xp < maxAmount) {
-                    final int remaining = maxAmount - xp;
-                    final int toDrain = Math.min(player.getXpNeededForNextLevel(), remaining);
-                    player.giveExperiencePoints(-toDrain);
-                    xp += toDrain;
-                }
-
-                if (xp < maxAmount) {
-                    while (canExtractXpAsOneOrb(player) && xp < maxAmount) {
-                        player.giveExperiencePoints(-1);
-                        ++xp;
+                try {
+                    while (player.experienceLevel > 0 && xp < maxAmount) {
+                        final int remaining = maxAmount - xp;
+                        final int toDrain = Math.min(player.getXpNeededForNextLevel(), remaining);
+                        player.giveExperiencePoints(-toDrain);
+                        xp += toDrain;
                     }
+
+                    if (xp < maxAmount) {
+                        while (canExtractXpAsOneOrb(player) && xp < maxAmount) {
+                            player.giveExperiencePoints(-1);
+                            ++xp;
+                        }
+                    }
+                } catch (Exception ex) {
+                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp", ex);
+                    return new DrainResult(xp, false, true);
                 }
                 return new DrainResult(xp, xp < maxAmount);
             }
