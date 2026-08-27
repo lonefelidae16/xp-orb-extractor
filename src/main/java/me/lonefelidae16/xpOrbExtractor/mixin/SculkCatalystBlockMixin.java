@@ -42,11 +42,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin {
     @Unique
     private static final Set<UUID> XPORBEX$PENDING_PLAYERS = ConcurrentHashMap.newKeySet();
+    @Unique
+    private static final float XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER = 0.25f;
 
     @Override
     protected InteractionResult xporbextractor$wrapUseItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, @Nullable Player player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original) {
         if (itemStack.is(Items.GLASS_BOTTLE) && XpOrbExtractor.config().bModEnabled && player != null) {
             final UUID playerUUID = UUID.fromString(player.getUUID().toString());
+            final Vec3 blockToPlayerDir = player.position().subtract(Vec3.atBottomCenterOf(pos)).normalize();
             if (level instanceof ServerLevel serverLevel && XPORBEX$PENDING_PLAYERS.add(playerUUID)) {
                 CompletableFuture.supplyAsync(() -> {
                     try {
@@ -57,7 +60,7 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
                     return DrainResult.EMPTY;
                 }).thenAcceptAsync(result -> {
                     serverLevel.getServer().execute(() -> {
-                        if (xporbextractor$trySpawnBottleEntity(serverLevel, pos, result)) {
+                        if (xporbextractor$trySpawnBottleEntity(serverLevel, pos, blockToPlayerDir, result)) {
                             try {
                                 itemStack.consume(1, player);
                                 player.awardStat(Stats.ITEM_USED.get(Items.GLASS_BOTTLE));
@@ -80,11 +83,23 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
     }
 
     @Unique
-    private static boolean xporbextractor$trySpawnBottleEntity(ServerLevel serverLevel, BlockPos pos, DrainResult drainResult) {
+    private static boolean xporbextractor$trySpawnBottleEntity(ServerLevel serverLevel, BlockPos pos, Vec3 toPlayerDirection, DrainResult drainResult) {
         if (drainResult.amount == 0) {
             return false;
         }
 
+        final Vec3 velocity = toPlayerDirection.multiply(XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER, XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER, XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER);
+        final BlockPos spawnTarget;
+        if (serverLevel.getBlockState(pos.above()).isAir()) {
+            spawnTarget = pos.above();
+        } else {
+            BlockPos playerDirOffset = pos.offset((int) Math.round(toPlayerDirection.x), (int) Math.round(toPlayerDirection.y), (int) Math.round(toPlayerDirection.z));
+            if (serverLevel.getBlockState(playerDirOffset).isAir()) {
+                spawnTarget = playerDirOffset;
+            } else {
+                spawnTarget = xporbextractor$searchAirBlock(serverLevel, playerDirOffset).orElse(pos);
+            }
+        }
         if (!drainResult.bDepleted || XpOrbExtractor.config().depletion == XpOrbExtractorConfig.DrainDepletion.ALLOW) {
             final ItemStack toExtract = new ItemStack(Items.EXPERIENCE_BOTTLE);
             final CompoundTag tag = new CompoundTag();
@@ -94,14 +109,13 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
             toExtract.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
             toExtract.set(DataComponents.LORE, lore);
 
-            final ItemEntity entity = new ItemEntity(serverLevel, pos.getX() + 0.5f, pos.getY() + 1f, pos.getZ() + 0.5f, toExtract, 0f, 0.25f, 0f);
+            final ItemEntity entity = new ItemEntity(serverLevel, spawnTarget.getX() + 0.5f, spawnTarget.getY() + 0.5f, spawnTarget.getZ() + 0.5f, toExtract, velocity.x, velocity.y, velocity.z);
             if (serverLevel.addFreshEntity(entity)) {
                 return true;
             }
         }
 
-        final BlockPos airBlockOrOrigin = xporbextractor$searchAirBlock(serverLevel, pos).orElse(pos);
-        ExperienceOrb.award(serverLevel, Vec3.atCenterOf(airBlockOrOrigin), drainResult.amount);
+        ExperienceOrb.award(serverLevel, Vec3.atCenterOf(spawnTarget), drainResult.amount);
         return false;
     }
 
