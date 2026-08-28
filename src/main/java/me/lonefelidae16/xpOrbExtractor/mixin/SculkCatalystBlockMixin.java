@@ -95,7 +95,7 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
         if (serverLevel.getBlockState(pos.above()).isAir()) {
             spawnTarget = pos.above();
         } else {
-            Vec3 toPlayerDirection = playerPosition.map(plPos -> plPos.subtract(Vec3.atBottomCenterOf(pos))).orElse(Vec3.Y_AXIS);
+            Vec3 toPlayerDirection = playerPosition.map(plPos -> plPos.subtract(Vec3.atBottomCenterOf(pos)).normalize()).orElse(Vec3.Y_AXIS);
             BlockPos playerDirOffset = pos.offset((int) Math.round(toPlayerDirection.x), (int) Math.round(toPlayerDirection.y), (int) Math.round(toPlayerDirection.z));
             if (serverLevel.getBlockState(playerDirOffset).isAir()) {
                 spawnTarget = playerDirOffset;
