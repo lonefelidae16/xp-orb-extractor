@@ -6,7 +6,7 @@
   "command.xporbextractor.notice.same_value": "is already %s.",
   "command.xporbextractor.details.drain_target": "Drain Target: %s",
   "command.xporbextractor.details.amount": "Drain Amount: %s",
-  "command.xporbextractor.details.allow_depletion": "Drain XP to zero: %s",
+  "command.xporbextractor.details.depletion": "Depletion - When player lacks XP, drops: %s",
 
   "command.xporbextractor.text.enabled": "§2§lEnabled§r",
   "command.xporbextractor.text.disabled": "§7Disabled§r",
@@ -14,12 +14,12 @@
   "command.xporbextractor.text.off": "§4OFF§r",
   "command.xporbextractor.text.level": "levels",
   "command.xporbextractor.text.xp": "experience points",
-  "command.xporbextractor.text.allow": "§2§lAllow§r",
-  "command.xporbextractor.text.deny": "§4Deny§r",
+  "command.xporbextractor.text.bottles": "Bottles",
+  "command.xporbextractor.text.orbs": "Orbs",
 
-  "command.xporbextractor.fail.invalid_input": "Invalid input: '%s'.",
+  "command.xporbextractor.fail.invalid_input": "Invalid input: '%s'",
   "command.xporbextractor.success.drain_target": "Set drain target as '%s'.",
-  "command.xporbextractor.success.drain_depletion": "Set drain XP to zero as %s.",
+  "command.xporbextractor.success.drain_depletion": "When player lacks XP, drops '%s'.",
 
   "command.xporbextractor.fail.drain_amount_negative": "Amount cannot be zero or negative.",
   "command.xporbextractor.fail.drain_amount_too_high": "Amount exceeds the maximum allowed value (2147483647).",

@@ -31,8 +31,8 @@ public class XpOrbExtractorConfig {
     }
 
     public enum DrainDepletion {
-        ALLOW("command.xporbextractor.text.allow"),
-        DENY("command.xporbextractor.text.deny");
+        BOTTLES("command.xporbextractor.text.bottles"),
+        ORBS("command.xporbextractor.text.orbs");
 
         private final String key;
 
@@ -74,7 +74,7 @@ public class XpOrbExtractorConfig {
                         return DrainDepletion.valueOf(in.nextString());
                     } catch (Exception ignore){
                     }
-                    return DrainDepletion.DENY;
+                    return DrainDepletion.ORBS;
                 }
             })
             .create();
@@ -82,7 +82,7 @@ public class XpOrbExtractorConfig {
     public boolean bModEnabled = true;
     public DrainTarget drainTarget = DrainTarget.XP;
     public int amountToDrain = 500;
-    public DrainDepletion depletion = DrainDepletion.DENY;
+    public DrainDepletion depletion = DrainDepletion.ORBS;
 
     public static XpOrbExtractorConfig load() {
         final File configFile = CONFIG_FILE.toFile();

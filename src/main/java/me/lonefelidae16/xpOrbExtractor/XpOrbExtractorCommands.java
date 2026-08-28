@@ -152,7 +152,7 @@ public class XpOrbExtractorCommands {
             context.getSource().sendSuccess(() -> {
                 return Component.translatable("command.xporbextractor.text.mod_name")
                         .append(" - ")
-                        .append(Component.translatable("command.xporbextractor.details.allow_depletion", CONFIG.depletion.asComponent()));
+                        .append(Component.translatable("command.xporbextractor.details.depletion", CONFIG.depletion.asComponent()));
             }, false);
             return Command.SINGLE_SUCCESS;
         }
@@ -274,7 +274,7 @@ public class XpOrbExtractorCommands {
                     status.append("\n");
                     status.append(Component.translatable("command.xporbextractor.details.amount", CONFIG.amountToDrain));
                     status.append("\n");
-                    status.append(Component.translatable("command.xporbextractor.details.allow_depletion", CONFIG.depletion.asComponent()));
+                    status.append(Component.translatable("command.xporbextractor.details.depletion", CONFIG.depletion.asComponent()));
                 }
                 return status;
             }, false);

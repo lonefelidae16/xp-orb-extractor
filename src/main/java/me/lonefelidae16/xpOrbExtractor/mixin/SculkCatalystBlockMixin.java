@@ -105,7 +105,7 @@ public abstract class SculkCatalystBlockMixin extends ExtendBlockBehaviourMixin 
         }
         final Vec3 spawnTargetCenter = Vec3.atCenterOf(spawnTarget);
         final Vec3 spawnVelocity = playerPosition.map(plPos -> plPos.subtract(spawnTargetCenter)).orElse(Vec3.Y_AXIS).multiply(XPORBEX$ENTITY_SPAWN_VELOCITY_MULTIPLIER);
-        if ((!drainResult.bDepleted && !drainResult.bFatal) || XpOrbExtractor.config().depletion == XpOrbExtractorConfig.DrainDepletion.ALLOW) {
+        if ((!drainResult.bDepleted && !drainResult.bFatal) || XpOrbExtractor.config().depletion == XpOrbExtractorConfig.DrainDepletion.BOTTLES) {
             final ItemStack targetItemStack = new ItemStack(Items.EXPERIENCE_BOTTLE);
             final CompoundTag tag = new CompoundTag();
             final ItemLore lore = new ItemLore(List.of(Component.translatable("item.xporbextractor.xp_amount_text", drainResult.amount)));

@@ -6,7 +6,7 @@
   "command.xporbextractor.notice.same_value": "すでに%sになっています。",
   "command.xporbextractor.details.drain_target": "計算元: %s",
   "command.xporbextractor.details.amount": "吸収量: %s",
-  "command.xporbextractor.details.allow_depletion": "経験値をゼロまで吸収: %s",
+  "command.xporbextractor.details.depletion": "経験値が不足したときドロップ: %s",
 
   "command.xporbextractor.text.enabled": "§2§l有効§r",
   "command.xporbextractor.text.disabled": "§7無効§r",
@@ -14,16 +14,16 @@
   "command.xporbextractor.text.off": "§4無効§r",
   "command.xporbextractor.text.level": "レベル",
   "command.xporbextractor.text.xp": "経験値",
-  "command.xporbextractor.text.allow": "§2§l許可§r",
-  "command.xporbextractor.text.deny": "§4拒否§r",
+  "command.xporbextractor.text.bottles": "エンチャントの瓶",
+  "command.xporbextractor.text.orbs": "経験値オーブ",
 
   "command.xporbextractor.fail.invalid_input": "無効な入力: '%s'",
   "command.xporbextractor.success.drain_target": "吸収量を '%s' から計算します。",
-  "command.xporbextractor.success.drain_depletion": "経験値のゼロまで吸収を%sします。",
+  "command.xporbextractor.success.drain_depletion": "経験値が不足したとき '%s' をドロップします。",
 
   "command.xporbextractor.fail.drain_amount_negative": "吸収量をゼロ以下に設定することはできません。",
   "command.xporbextractor.fail.drain_amount_too_high": "吸収量が最大値を超えています (2147483647)。",
   "command.xporbextractor.success.drain_amount": "吸収量を '%s' に設定しました。",
 
-  "subtitles.xporbextractor.xp_drain_fail": "経験値の吸収に失敗する"
+  "subtitles.xporbextractor.xp_drain_fail": "経験値が溢れる"
 }
