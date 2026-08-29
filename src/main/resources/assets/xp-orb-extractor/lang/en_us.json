@@ -12,8 +12,8 @@
   "command.xporbextractor.text.disabled": "§7Disabled§r",
   "command.xporbextractor.text.on": "§2§lON§r",
   "command.xporbextractor.text.off": "§4OFF§r",
-  "command.xporbextractor.text.level": "levels",
-  "command.xporbextractor.text.xp": "experience points",
+  "command.xporbextractor.text.levels": "levels",
+  "command.xporbextractor.text.experience_points": "experience points",
   "command.xporbextractor.text.bottles": "Bottles",
   "command.xporbextractor.text.orbs": "Orbs",
 

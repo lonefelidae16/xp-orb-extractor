@@ -10,7 +10,7 @@ public class PlayerUtil {
     }
 
     /**
-     * Too heavy method when the target is {@link me.lonefelidae16.xpOrbExtractor.XpOrbExtractorConfig.DrainTarget#LEVEL}
+     * Too heavy method when the target is {@link me.lonefelidae16.xpOrbExtractor.XpOrbExtractorConfig.DrainTarget#LEVELS}
      * and the amount is {@link Integer#MAX_VALUE}.
      * <p><strong>The argument {@code player} may be null while calculating!</strong></p>
      *
@@ -26,7 +26,7 @@ public class PlayerUtil {
         }
 
         switch (drainTarget) {
-            case LEVEL -> {
+            case LEVELS -> {
                 int xp = 0;
                 int drainedLevel = 0;
                 boolean bLevelReached;
@@ -52,7 +52,7 @@ public class PlayerUtil {
                 }
                 return new DrainResult(xp, !bLevelReached && xp < Integer.MAX_VALUE);
             }
-            case XP -> {
+            case POINTS -> {
                 int xp = 0;
                 try {
                     while (player.experienceLevel > 0 && xp < maxAmount) {

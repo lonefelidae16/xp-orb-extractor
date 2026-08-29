@@ -16,8 +16,8 @@ import java.util.Objects;
 
 public class XpOrbExtractorConfig {
     public enum DrainTarget {
-        LEVEL("command.xporbextractor.text.level"),
-        XP("command.xporbextractor.text.xp");
+        LEVELS("command.xporbextractor.text.levels"),
+        POINTS("command.xporbextractor.text.experience_points");
 
         private final String key;
 
@@ -45,7 +45,7 @@ public class XpOrbExtractorConfig {
         }
     }
 
-    private static final Path CONFIG_FILE = Path.of("./config", XpOrbExtractor.MOD_ID, "config.json");
+    private static final Path CONFIG_FILE_PATH = Path.of("./config", XpOrbExtractor.MOD_ID, "config.json");
     private static final Gson CONVERTER = new GsonBuilder()
             .registerTypeAdapter(DrainTarget.class, new TypeAdapter<DrainTarget>() {
                 @Override
@@ -59,7 +59,7 @@ public class XpOrbExtractorConfig {
                         return DrainTarget.valueOf(in.nextString());
                     } catch (Exception ignore) {
                     }
-                    return DrainTarget.XP;
+                    return DrainTarget.POINTS;
                 }
             })
             .registerTypeAdapter(DrainDepletion.class, new TypeAdapter<DrainDepletion>() {
@@ -80,12 +80,12 @@ public class XpOrbExtractorConfig {
             .create();
 
     public boolean bModEnabled = true;
-    public DrainTarget drainTarget = DrainTarget.XP;
+    public DrainTarget drainTarget = DrainTarget.POINTS;
     public int amountToDrain = 500;
     public DrainDepletion depletion = DrainDepletion.ORBS;
 
     public static XpOrbExtractorConfig load() {
-        final File configFile = CONFIG_FILE.toFile();
+        final File configFile = CONFIG_FILE_PATH.toFile();
         if (configFile.exists()) {
             try (FileReader reader = new FileReader(configFile)) {
                 return Objects.requireNonNull(CONVERTER.fromJson(reader, XpOrbExtractorConfig.class));
@@ -100,11 +100,11 @@ public class XpOrbExtractorConfig {
 
     public static void save(XpOrbExtractorConfig config) {
         try {
-            Path dir = CONFIG_FILE.getParent();
+            Path dir = CONFIG_FILE_PATH.getParent();
             if (!Files.isDirectory(dir)) {
                 Files.createDirectories(dir);
             }
-            Files.writeString(CONFIG_FILE, CONVERTER.toJson(config));
+            Files.writeString(CONFIG_FILE_PATH, CONVERTER.toJson(config));
         } catch (Exception ex) {
             XpOrbExtractor.LOGGER.error("Failed to write config file.", ex);
         }
