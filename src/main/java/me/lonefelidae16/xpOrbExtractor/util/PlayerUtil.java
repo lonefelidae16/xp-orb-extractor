@@ -3,7 +3,10 @@ package me.lonefelidae16.xpOrbExtractor.util;
 import me.lonefelidae16.xpOrbExtractor.XpOrbExtractor;
 import me.lonefelidae16.xpOrbExtractor.XpOrbExtractorConfig;
 import me.lonefelidae16.xpOrbExtractor.state.DrainResult;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.UUID;
 
 public class PlayerUtil {
     private PlayerUtil() {
@@ -20,6 +23,7 @@ public class PlayerUtil {
      */
     public static DrainResult getAndDecreaseXp(Player player) {
         final int maxAmount = XpOrbExtractor.config().amountToDrain;
+        final UUID playerUUID = player.getUUID();
         final XpOrbExtractorConfig.DrainTarget drainTarget = XpOrbExtractor.config().drainTarget;
         if (maxAmount < 0 || drainTarget == null) {
             return DrainResult.EMPTY;
@@ -47,7 +51,7 @@ public class PlayerUtil {
                         }
                     }
                 } catch (Exception ex) {
-                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp", ex);
+                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp for player {}", playerUUID.toString(), ex);
                     return new DrainResult(xp, false, true);
                 }
                 return new DrainResult(xp, !bLevelReached && xp < Integer.MAX_VALUE);
@@ -69,7 +73,7 @@ public class PlayerUtil {
                         }
                     }
                 } catch (Exception ex) {
-                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp", ex);
+                    XpOrbExtractor.LOGGER.error("An error occurred while getting xp for player {}", playerUUID.toString(), ex);
                     return new DrainResult(xp, false, true);
                 }
                 return new DrainResult(xp, xp < maxAmount);
@@ -83,7 +87,7 @@ public class PlayerUtil {
             return true;
         }
 
-        final float oneOrbProgress = 1f / player.getXpNeededForNextLevel();
-        return player.experienceProgress - oneOrbProgress > 0f;
+        final double oneOrbProgress = 1.0 / player.getXpNeededForNextLevel();
+        return player.experienceProgress - oneOrbProgress > -Mth.EPSILON;
     }
 }
